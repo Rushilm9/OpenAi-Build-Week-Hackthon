@@ -55,6 +55,23 @@ The system can return **`WAIT`** when evidence is incomplete or conviction is no
 | Weak evidence still produces confident language | Deterministic checks can cap confidence or return `WAIT` | Uncertainty becomes an explicit, useful output |
 | Research disappears after the session | Reports are stored, searchable, and exportable | Analysis becomes durable team knowledge |
 
+## Work & Productivity track
+
+We selected **Work & Productivity**. The [official OpenAI Build Week challenge](https://openai.devpost.com/) defines this track as tools that make teams faster or more effective across workflows such as automation, analytics, support, sales, and operations.
+
+ArthVest fits this track because investment research is professional knowledge work. The product does not manage a consumer portfolio or execute trades; it improves how analysts and research teams gather evidence, divide work, challenge conclusions, and produce an auditable deliverable.
+
+| Professional workflow | Without ArthVest | With ArthVest | Productivity value |
+| --- | --- | --- | --- |
+| Establish market context | Open and reconcile several dashboards and feeds | Economic, market-pulse, news, and macro stages build one shared context | Less context switching and duplicated collection |
+| Find candidates | Run separate screens and manually compare horizons | Discovery ranks candidates for short-, medium-, and long-term research | A repeatable shortlist with visible evidence |
+| Analyze a company | One researcher sequentially studies every evidence type | Independent specialists examine technicals, fundamentals, sentiment, and chart structure | Parallel, consistent research coverage |
+| Challenge a thesis | Depend on the researcher to notice personal bias | Bull and bear cases are generated before the decision | Disagreement becomes part of the workflow |
+| Apply quality control | Manually inspect confidence, risk, and contradictions | Deterministic validation can cap confidence or return `WAIT` | More consistent and reviewable conclusions |
+| Deliver the work | Copy findings into a separate document | Searchable history and PDF export preserve the full report | Reusable output for review and collaboration |
+
+**Category outcome:** ArthVest helps research teams move faster by automating evidence assembly and become more effective by making every conclusion explainable, challengeable, and reusable.
+
 ## Why ArthVest is different
 
 | Typical market assistant | ArthVest |
@@ -97,6 +114,19 @@ The analysis report connects the final verdict to entry, target, stop loss, risk
 Completed recommendations remain searchable by symbol, date, signal, and horizon. Reports can be reopened and downloaded instead of disappearing at the end of a chat.
 
 ![ArthVest recommendation history and saved report](photos/openai_saved_report.png)
+
+## Three-minute judge walkthrough
+
+The live product can be evaluated without rebuilding the project:
+
+| Time | What to show | What it proves |
+| --- | --- | --- |
+| `0:00–0:25` | Open the dashboard and explain the fragmented-research problem | Clear user need and a complete product starting point |
+| `0:25–0:55` | Open Discover and inspect economic, market, news, and macro context | Research begins with shared evidence instead of a ticker hunch |
+| `0:55–1:25` | Run or inspect discovery across time horizons | GPT-5.6 turns broad context into ranked, explainable candidates |
+| `1:25–2:15` | Open a company analysis and inspect specialist evidence, risks, debate, and verdict | Non-trivial multi-agent orchestration and visible reasoning |
+| `2:15–2:40` | Show a `BUY`, `SELL`, or `WAIT` result with validation and confidence | Refusal-first safety and deterministic quality control |
+| `2:40–3:00` | Open Saved Reports, then summarize Codex's Architect → Implement → Test workflow | Durable productivity output and genuine Codex usage |
 
 ## End-to-end workflow
 
@@ -189,6 +219,17 @@ Architect → approved system blueprint → Implement → working product → Te
 | **Test** | Challenge the implementation with reproducible checks | Verified verdict consistency, evidence bounds, refusal behavior, model configuration, safe rendering, imports, builds, and the journey from discovery to a saved explainable report. |
 
 This was not a one-shot code-generation prompt. Codex inspected the existing code, worked against explicit success criteria, traced failures across frontend and backend boundaries, and used test evidence to guide focused corrections. Human judgment remained responsible for the problem definition, product decisions, research rules, evaluation criteria, and final review.
+
+## Evidence against the judging criteria
+
+The [official judging criteria](https://openai.devpost.com/) focus on technological implementation, design, potential impact, and quality of the idea. ArthVest provides concrete evidence for each dimension:
+
+| Judging dimension | Evidence in ArthVest |
+| --- | --- |
+| **Technological implementation** | A working React/FastAPI application, two LangGraph workflows, role-based GPT-5.6 routing, parallel specialists, deterministic validation, persistence, authentication, telemetry, regression tests, and three explicit Codex development skills |
+| **Design** | A coherent journey from dashboard → discovery → analysis → validated report → history, with responsive screens, visible progress, safe rich text, and PDF export |
+| **Potential impact** | A specific audience—equity researchers, analysts, advisers, and small research teams—with a direct productivity case across collection, analysis, quality control, and reporting |
+| **Quality of the idea** | Context-first discovery, reasoning-tier orchestration, independent specialists, adversarial debate, and `WAIT` as a valuable refusal outcome rather than a model failure |
 
 ## Safety, trust, and explainability
 
