@@ -1,0 +1,56 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+
+# Python environments and bytecode
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+
+# Tests, coverage, type checking, and benchmarks
+.pytest_cache/
+.benchmarks/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+
+# Packaging and build output
+build/
+dist/
+*.egg-info/
+
+# Runtime state
+*.log
+*.db
+*.sqlite3
+*.sqlite3-journal
+app/qa_logs/*.jsonl
+app/services/last_discovery_context.json
+results/
+mcp_stderr.log
+
+# Scratch and generated submission artifacts
+scratch/
+scratch*
+*probe*
+*.pdf
+
+# IDE and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
