@@ -128,27 +128,130 @@ The live product can be evaluated without rebuilding the project:
 | `2:15–2:40` | Show a `BUY`, `SELL`, or `WAIT` result with validation and confidence | Refusal-first safety and deterministic quality control |
 | `2:40–3:00` | Open Saved Reports, then summarize Codex's Architect → Implement → Test workflow | Durable productivity output and genuine Codex usage |
 
-## End-to-end workflow
+## High-level architecture
+
+ArthVest has two separate LangGraph workflows behind the same React and FastAPI application. Discovery finds evidence-backed candidates; Analysis performs deeper company research on a selected symbol. Solid arrows show workflow execution, while dashed arrows show supporting model, data, persistence, and observability services.
+
+### Discovery architecture (F1)
 
 ```mermaid
-flowchart LR
-    U["Researcher"] --> D["Discover market opportunities"]
-    D --> C["Economic + market + news context"]
-    C --> P["Research planner"]
-    P --> T["Technical specialist"]
-    P --> F["Fundamental specialist"]
-    P --> S["Sentiment specialist"]
-    P --> CP["Chart-pattern specialist"]
-    T --> M["Merge evidence"]
-    F --> M
-    S --> M
-    CP --> M
-    M --> H["Confirm time horizon"]
-    H --> B["Bull vs. bear debate"]
-    B --> V["Deterministic validation"]
-    V --> R["BUY / SELL / WAIT report"]
-    R --> A["History + PDF export"]
+flowchart TB
+    USER["Researcher"] --> UI["React app<br/>Discover workspace"]
+    UI --> API["FastAPI<br/>Discovery API"]
+
+    subgraph F1["F1 - LangGraph discovery workflow"]
+        direction LR
+        START(("Start")) --> ECON["Economic Agent<br/>regime + sectors<br/>Terra / low reasoning"]
+        ECON --> MARKET["Market Pulse Agent<br/>breadth + VIX + indices"]
+        MARKET --> NEWS["News Agent<br/>themes + sentiment<br/>Terra / low reasoning"]
+        NEWS --> MACRO["Macro Context Agent<br/>shared market frame<br/>Sol / medium reasoning"]
+        MACRO --> PLAN["Planner Agent<br/>research plan<br/>Sol / medium reasoning"]
+        PLAN --> DISC["Discovery Agent<br/>screen + rank candidates<br/>Terra / low reasoning"]
+        DISC --> FINISH(("End"))
+    end
+
+    API --> START
+    DISC --> SHORT["Short term<br/>1-2 weeks"]
+    DISC --> MID["Medium term<br/>4-6 weeks"]
+    DISC --> LONG["Long term<br/>3+ months"]
+    SHORT --> RESULT["Ranked discovery report"]
+    MID --> RESULT
+    LONG --> RESULT
+    RESULT --> UI
+
+    DATA["MCP + market-data services<br/>indices, prices, news, fundamentals"] -.-> ECON
+    DATA -.-> MARKET
+    DATA -.-> NEWS
+    DATA -.-> DISC
+    ROUTER["OpenAI model router<br/>GPT-5.6 role allowlist"] -.-> ECON
+    ROUTER -.-> NEWS
+    ROUTER -.-> MACRO
+    ROUTER -.-> PLAN
+    ROUTER -.-> DISC
+    STORE["PostgreSQL / Supabase<br/>runs + discoveries"] -.-> RESULT
+    OBS["Agent telemetry<br/>status + latency + tokens + retries"] -.-> F1
+
+    classDef low fill:#e8f5e9,stroke:#2e7d32,color:#111;
+    classDef medium fill:#e3f2fd,stroke:#1565c0,color:#111;
+    classDef service fill:#fff3e0,stroke:#c45a08,color:#111;
+    class ECON,NEWS,DISC low;
+    class MACRO,PLAN medium;
+    class DATA,ROUTER,STORE,OBS service;
 ```
+
+The Discovery graph builds context before selecting companies. Its output is not a generic stock list: each candidate is tied to a horizon, score, catalyst, risk summary, and evidence-quality state.
+
+### Analysis architecture (F2)
+
+```mermaid
+flowchart TB
+    USER["Researcher or selected discovery candidate"] --> UI["React app<br/>Analyze workspace"]
+    UI --> API["FastAPI<br/>Analysis API + job dispatch"]
+
+    subgraph F2["F2 - LangGraph analysis workflow"]
+        direction TB
+
+        subgraph CONTEXT["Context and planning"]
+            direction LR
+            START(("Start")) --> ECON["Economic Agent<br/>Terra / low"]
+            ECON --> MARKET["Market Pulse Agent"]
+            MARKET --> NEWS["News Agent<br/>Terra / low"]
+            NEWS --> MACRO["Macro Context Agent<br/>Sol / medium"]
+            MACRO --> PLAN["Planner Agent<br/>Sol / medium"]
+        end
+
+        subgraph SPECIALISTS["Parallel specialist analysis"]
+            direction LR
+            TECH["Technical Agent<br/>trend + momentum<br/>Terra / low"]
+            FUND["Fundamental Agent<br/>business + valuation<br/>Terra / low"]
+            SENT["Sentiment Agent<br/>narrative + signals<br/>Terra / low"]
+            CHART["Chart Pattern Agent<br/>geometry + structure<br/>Terra / low"]
+        end
+
+        PLAN --> TECH
+        PLAN --> FUND
+        PLAN --> SENT
+        PLAN --> CHART
+
+        TECH --> MERGE["Merge signals<br/>supporting + contradictory evidence"]
+        FUND --> MERGE
+        SENT --> MERGE
+        CHART --> MERGE
+
+        MERGE --> HORIZON["Horizon Confirmation Agent<br/>short / medium / long fit"]
+        HORIZON --> DEBATE["Bull vs. Bear Debate Agent<br/>Sol / high reasoning"]
+        DEBATE --> DECISION["Decision Agent<br/>Sol / medium reasoning"]
+        DECISION --> VALIDATE["Deterministic validator<br/>verdict + confidence + geometry + risk"]
+        VALIDATE --> FINISH(("End"))
+    end
+
+    API --> START
+    VALIDATE --> REPORT["Explainable report<br/>BUY / SELL / WAIT"]
+    REPORT --> HISTORY["Saved history + PDF export"]
+    HISTORY --> UI
+
+    DATA["MCP + market-data services<br/>prices, news, fundamentals, indicators"] -.-> CONTEXT
+    DATA -.-> SPECIALISTS
+    ROUTER["OpenAI model router<br/>low / medium / high reasoning"] -.-> CONTEXT
+    ROUTER -.-> SPECIALISTS
+    ROUTER -.-> DEBATE
+    ROUTER -.-> DECISION
+    STORE["PostgreSQL / Supabase<br/>runs + logs + recommendations"] -.-> HISTORY
+    OBS["Agent telemetry<br/>status + latency + tokens + failures"] -.-> F2
+
+    classDef low fill:#e8f5e9,stroke:#2e7d32,color:#111;
+    classDef medium fill:#e3f2fd,stroke:#1565c0,color:#111;
+    classDef high fill:#f3e5f5,stroke:#7b1fa2,color:#111;
+    classDef deterministic fill:#fff8e1,stroke:#f57f17,color:#111;
+    classDef service fill:#fff3e0,stroke:#c45a08,color:#111;
+    class ECON,NEWS,TECH,FUND,SENT,CHART low;
+    class MACRO,PLAN,DECISION medium;
+    class DEBATE high;
+    class MARKET,MERGE,HORIZON,VALIDATE deterministic;
+    class DATA,ROUTER,STORE,OBS service;
+```
+
+The Analysis graph deliberately separates evidence collection from judgment. Four specialists run independently, disagreement survives the merge, high reasoning is reserved for debate, and deterministic code validates the final model-produced decision before it reaches the report.
 
 ### Agent roster
 
