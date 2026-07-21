@@ -31,7 +31,7 @@ Most market assistants are optimized to produce an answer. ArthaVest is optimize
 
 | Market discovery | Evidence-backed analysis |
 | --- | --- |
-| ![ArthaVest discovery dashboard](images/Discovery-2.png) | ![ArthaVest stock analysis](images/Analysis.png) |
+| ![ArthVest discovery dashboard](../photos/openai_discovery_2.png) | ![ArthVest stock analysis](../photos/openai_analyse.png) |
 
 ## Architecture
 

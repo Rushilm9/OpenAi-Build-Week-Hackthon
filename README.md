@@ -1,235 +1,349 @@
-# ArthaVest Backend
+<div align="center">
+  <img src="frontend/src/assets/arthvest-logo.png" alt="ArthVest logo" width="150" />
 
-ArthaVest is a refusal-first, multi-agent equity-research API for Indian markets. It combines live market context, independent specialist analysis, adversarial debate, and deterministic validation before returning a `BUY`, `SELL`, or `WAIT` research verdict.
+  # ArthVest
 
-The system is designed for decision support—not autonomous trade execution. When evidence is missing, stale, or contradictory, the safe outcome is `WAIT` with explicit data-quality and missing-evidence fields.
+  ### An evidence-first AI research desk for Indian equities
 
-## Built with Codex and GPT-5.6
+  **OpenAI Build Week Hackathon · Work & Productivity**
 
-Codex and GPT-5.6 were part of the engineering workflow, not just the product demo. I developed and used three focused Codex skills to move ArthVest from architecture to verified implementation while keeping each stage explicit and reviewable.
+  [![Live Demo](https://img.shields.io/badge/Live_Demo-Open_ArthVest-C45A08?style=for-the-badge)](https://openai-hack-arthvest.vercel.app/)
+  [![Built with OpenAI](https://img.shields.io/badge/Built_with-OpenAI-000000?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com/)
+  [![Built with Codex](https://img.shields.io/badge/Built_with-Codex-111111?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com/codex/)
+  ![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+  ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+</div>
 
-| Custom Codex skill | How it was used in ArthVest |
+---
+
+> **ArthVest turns fragmented market information into a structured, explainable research report. It coordinates specialist AI agents to discover opportunities, analyze evidence, challenge a thesis, validate risk, and return `BUY`, `SELL`, or `WAIT`—without executing a trade.**
+
+```text
+Discover → Analyze → Debate → Validate → Decide → Report
+```
+
+## Problem statement
+
+Investment research is not one search or one prompt. A serious researcher must combine macro conditions, market breadth, company fundamentals, price action, chart structure, news, sentiment, time horizon, risk, and conflicting evidence before reaching a conclusion.
+
+Today that process is usually:
+
+- **Fragmented:** evidence lives across screeners, charts, feeds, filings, dashboards, and personal notes.
+- **Slow:** researchers repeatedly search, copy, normalize, compare, and format the same information.
+- **Biased:** an early bullish or bearish opinion can quietly shape every later step.
+- **Hard to audit:** many AI tools return an answer without showing missing data, disagreement, or validation failures.
+- **Overconfident:** generic assistants are optimized to answer even when the available evidence is stale, weak, or contradictory.
+
+The result is a productivity problem and a trust problem. Researchers spend too much time assembling information and still struggle to explain why a conclusion should be believed.
+
+## The solution
+
+ArthVest behaves like a coordinated research desk rather than a single chatbot. It runs two connected workflows:
+
+1. **Market discovery** builds economic, market, news, and macro context before ranking candidates for short-, medium-, and long-term research.
+2. **Company analysis** dispatches independent technical, fundamental, sentiment, and chart-pattern specialists, merges their evidence, checks the selected horizon, stages a bull-versus-bear debate, and applies deterministic validation before producing a report.
+
+The system can return **`WAIT`** when evidence is incomplete or conviction is not justified. Refusing to manufacture certainty is a core product feature.
+
+## Why ArthVest is different
+
+| Typical market assistant | ArthVest |
 | --- | --- |
-| **Architect** | Designed the multi-agent research system, separated discovery from company analysis, defined LangGraph state and agent boundaries, and established refusal-first verdict and safety rules. |
-| **Implement** | Turned the approved architecture into FastAPI services, OpenAI model routing, specialist agents, persistence, telemetry, and frontend-facing API contracts. |
-| **Test** | Exercised deterministic verdict consistency, refusal behavior, model configuration, imports, and critical integration paths before the code was prepared for submission. |
+| One large prompt produces one opinion | Multiple agents own independent research responsibilities |
+| Starts with a ticker and ignores the environment | Builds economic, market-pulse, news, and macro context first |
+| Confirms the first plausible thesis | Forces a bull-versus-bear debate before synthesis |
+| Hides disagreement and missing evidence | Surfaces supporting, contradictory, stale, and unavailable evidence |
+| Always tries to produce a recommendation | Uses refusal-first rules and can return `WAIT` |
+| Produces disposable chat text | Saves an auditable report that can be revisited or exported |
 
-GPT-5.6 powers the application's research workloads through role-based routing: `gpt-5.6-terra` handles high-throughput discovery and context gathering, while `gpt-5.6-sol` handles planning, synthesis, decisions, and deeper adversarial analysis. Codex helped inspect the codebase, apply focused changes, trace cross-layer issues, and verify the result; I retained control of the product decisions, financial-research rules, and final review.
+## Product experience
 
-## Why it matters
+### 1. Begin with the market, not a hunch
 
-Most market assistants are optimized to produce an answer. ArthaVest is optimized to know when the evidence is not strong enough. Its core safeguards are:
+The dashboard consolidates major Indian and global indices, market breadth, volatility, commodities, and current news so company research starts in context.
 
-- independent economic, market-pulse, news, technical, fundamental, sentiment, and chart-pattern agents;
-- an explicit horizon-confirmation step for short-, mid-, and long-term analysis;
-- adversarial debate before the final decision;
-- geometric, risk/reward, sanity, and narrative-consistency checks;
-- a single normalized verdict vocabulary: `BUY`, `SELL`, or `WAIT`;
-- per-agent run telemetry, latency, token usage, failures, and persisted recommendations.
+![ArthVest live market dashboard](photos/openai_dashboard.png)
 
-## Product preview
+### 2. Build a shared research context
 
-| Market discovery | Evidence-backed analysis |
-| --- | --- |
-| ![ArthaVest discovery dashboard](images/Discovery-2.png) | ![ArthaVest stock analysis](images/Analysis.png) |
+Before ranking a company, ArthVest shows the economic regime, market pulse, news sentiment, macro confidence, hot sectors, avoid sectors, and the reasoning behind those signals.
 
-## Architecture
+![ArthVest economic, market, news, and macro discovery context](photos/openai_discovery_1.png)
 
-ArthaVest exposes two LangGraph workflows through FastAPI.
+### 3. Rank opportunities by horizon and evidence
+
+Candidates are organized for short-, medium-, and long-term research. Each result exposes its discovery score, catalyst, key metrics, risk count, evidence quality, and analysis state.
+
+![ArthVest ranked opportunity discovery](photos/openai_discovery_2.png)
+
+### 4. Inspect the decision—not just the label
+
+The analysis report connects the final verdict to entry, target, stop loss, risk/reward, expected duration, confidence, catalysts, specialist evidence, counter-signals, and validation outcomes.
+
+![ArthVest explainable multi-agent analysis](photos/openai_analyse.png)
+
+### 5. Preserve research as an auditable work product
+
+Completed recommendations remain searchable by symbol, date, signal, and horizon. Reports can be reopened and downloaded instead of disappearing at the end of a chat.
+
+![ArthVest recommendation history and saved report](photos/openai_saved_report.png)
+
+## End-to-end workflow
 
 ```mermaid
 flowchart LR
-    subgraph F1["F1 — Market discovery"]
-        E1["Economic context"] --> M1["Market pulse"] --> N1["News"]
-        N1 --> C1["Macro context"] --> P1["Planner"] --> D1["Discovery & ranking"]
-    end
-
-    subgraph F2["F2 — Stock analysis"]
-        E2["Economic context"] --> M2["Market pulse"] --> N2["News"]
-        N2 --> C2["Macro context"] --> P2["Planner"]
-        P2 --> T["Technical"]
-        P2 --> F["Fundamental"]
-        P2 --> S["Sentiment"]
-        P2 --> CP["Chart pattern"]
-        T --> MERGE["Merge signals"]
-        F --> MERGE
-        S --> MERGE
-        CP --> MERGE
-        MERGE --> H["Horizon confirmation"] --> DB["Adversarial debate"] --> V["Validated verdict"]
-    end
-
-    DATA["MCP market-data service + local fallbacks"] --> E1
-    DATA --> E2
-    V --> PG["PostgreSQL / Supabase"]
+    U["Researcher"] --> D["Discover market opportunities"]
+    D --> C["Economic + market + news context"]
+    C --> P["Research planner"]
+    P --> T["Technical specialist"]
+    P --> F["Fundamental specialist"]
+    P --> S["Sentiment specialist"]
+    P --> CP["Chart-pattern specialist"]
+    T --> M["Merge evidence"]
+    F --> M
+    S --> M
+    CP --> M
+    M --> H["Confirm time horizon"]
+    H --> B["Bull vs. bear debate"]
+    B --> V["Deterministic validation"]
+    V --> R["BUY / SELL / WAIT report"]
+    R --> A["History + PDF export"]
 ```
 
-### Model routing
+### Agent roster
 
-The model provider boundary is implemented in `app/core/model_router.py`:
+| Agent or stage | Responsibility |
+| --- | --- |
+| Economic | Interprets the broader economic regime and sector implications |
+| Market pulse | Measures breadth, volatility, index behavior, and market health |
+| News | Extracts current sentiment, themes, anomalies, and sector-level signals |
+| Macro context | Combines upstream conditions into a shared research frame |
+| Planner | Decides what the workflow must investigate for the selected task |
+| Discovery | Screens and ranks opportunities across three time horizons |
+| Technical | Evaluates trend, momentum, levels, and technical indicators |
+| Fundamental | Examines business and valuation evidence |
+| Sentiment | Evaluates market and company-level narrative signals |
+| Chart pattern | Identifies chart structures and geometric price evidence |
+| Horizon confirmation | Checks whether the evidence matches the intended holding period |
+| Debate | Develops and challenges bull and bear cases |
+| Decision + validator | Synthesizes evidence and enforces verdict, confidence, geometry, and risk rules |
 
-| Role | Workload | Default model | Reasoning effort |
+No single specialist controls the final conclusion. The decision is produced only after independent evidence has been merged, challenged, and validated.
+
+## OpenAI GPT-5.6 integration
+
+OpenAI models run behind a server-side model boundary implemented in `backend/app/core/model_router.py`. The browser never receives an OpenAI credential and cannot submit an arbitrary model ID.
+
+| Runtime role | Workload | Model | Reasoning effort |
 | --- | --- | --- | --- |
-| `DISCOVERY` | Discovery and high-throughput context | `gpt-5.6-terra` | Low |
-| `ANALYSIS` | Planning, synthesis, and decisions | `gpt-5.6-sol` | Medium |
-| `ANALYSIS_DEEP` | Adversarial debate and hardest analysis | `gpt-5.6-sol` | High |
+| `DISCOVERY` | High-throughput discovery and context gathering | `gpt-5.6-terra` | Low |
+| `ANALYSIS` | Planning, specialist reasoning, and decision synthesis | `gpt-5.6-sol` | Medium |
+| `ANALYSIS_DEEP` | Adversarial debate and the hardest reasoning steps | `gpt-5.6-sol` | High |
 
-All roles use OpenAI's Responses API through `langchain-openai`. Model IDs and
-reasoning efforts are configurable through environment variables. Client-supplied
-API keys and arbitrary model IDs are rejected.
+All roles use OpenAI through the Responses API via `langchain-openai`. Role-based routing gives fast discovery work a different cost/latency profile from deep synthesis, while a strict allowlist prevents unreviewed models from entering the workflow.
 
-### Data and persistence
+GPT-5.6 is used to:
 
-- Market and macro tools use the configured MCP service first, with targeted local fallbacks where supported.
-- Yahoo Finance, TradingView Screener, RSS feeds, FinVADER, and optional FRED/Finnhub/Alpha Vantage credentials supplement the research pipeline.
-- SQLAlchemy persists users, runs, agent logs, discoveries, alerts, and recommendations to PostgreSQL-compatible databases.
-- Local JSON output is disabled by default to keep deployments clean.
+- interpret heterogeneous market evidence within a shared state;
+- produce structured outputs for specialist and decision stages;
+- reason across supporting and contradictory signals;
+- generate explicit catalysts, risks, missing-evidence notes, and debate arguments;
+- turn validated evidence into a readable research narrative.
 
-## Repository layout
+Deterministic code remains responsible for validation rules, verdict normalization, persistence, authentication, API boundaries, and refusal behavior.
+
+## How Codex was used
+
+Codex was part of the engineering workflow from architecture through verification. I developed and used exactly three focused Codex skills for ArthVest:
+
+| Custom Codex skill | Contribution |
+| --- | --- |
+| **Architect** | Mapped the complete researcher journey, separated discovery from analysis, defined agent and service boundaries, designed shared state, and established refusal-first safety and failure paths. |
+| **Implement** | Turned the architecture into the React application, FastAPI services, LangGraph workflows, OpenAI model routing, persistence, telemetry, report export, and frontend/backend contracts. |
+| **Test** | Checked verdict consistency, evidence bounds, refusal behavior, model configuration, safe rendering, imports, builds, and the critical journey from discovery to a saved explainable report. |
+
+Codex accelerated repository inspection, focused implementation, cross-layer debugging, documentation, and verification. Human judgment remained responsible for the problem definition, product decisions, research rules, evaluation criteria, and final review.
+
+## Safety, trust, and explainability
+
+ArthVest is intentionally designed as research software—not an autonomous trading system.
+
+- **No trade execution:** the platform cannot place an order or move funds.
+- **Refusal-first verdicts:** missing, stale, contradictory, or low-conviction evidence can result in `WAIT`.
+- **Deterministic validation:** sanity, geometry, risk/reward, confidence, and narrative consistency are checked after model reasoning.
+- **Adversarial review:** bull and bear cases are developed before the final decision.
+- **Visible uncertainty:** data quality, contradictory evidence, risks, and missing information remain visible to the researcher.
+- **Server-side secrets:** OpenAI and data-provider credentials remain in the backend environment.
+- **Restricted model routing:** arbitrary client-supplied keys and model IDs are rejected.
+- **Safe rich text:** model-generated formatted content is sanitized before browser rendering.
+- **Operational evidence:** agent status, latency, token use, retries, failures, and completed runs can be inspected.
+
+## Impact
+
+ArthVest is designed for independent equity researchers, financial analysts, wealth advisers, small research teams, and serious self-directed investors who need a repeatable research process.
+
+The product improves knowledge-work productivity by:
+
+- replacing repeated movement between disconnected research tools with one guided workflow;
+- applying the same evidence and validation stages to every company;
+- making disagreement and uncertainty reviewable rather than implicit;
+- preserving completed research for comparison, audit, and export;
+- letting the human spend more time reviewing assumptions and less time assembling raw information.
+
+## Technology
+
+| Layer | Technology |
+| --- | --- |
+| Web application | React 19, TypeScript, Vite, Tailwind CSS, TanStack Query |
+| API | FastAPI, Pydantic, SQLAlchemy |
+| Agent orchestration | LangGraph shared-state workflows |
+| Intelligence | OpenAI GPT-5.6 through the Responses API |
+| Market context | MCP-first access with targeted provider fallbacks |
+| Supporting data | Yahoo Finance, TradingView Screener, RSS, FinVADER, and optional provider integrations |
+| Persistence | PostgreSQL / Supabase |
+| Reports | React PDF and jsPDF |
+| Deployment | Vercel-ready frontend and Docker/Cloud Run-ready backend |
+
+## Repository structure
 
 ```text
-app/
-├── agents/       # LangGraph state, workflows, specialist nodes, and prompts
-├── api/routes/   # Auth, discovery/analysis, market, alerts, SMC, and telemetry APIs
-├── core/         # Configuration, model routing, scheduling, security, and verdict rules
-├── db/           # SQLAlchemy models
-├── schemas/      # Pydantic request/response contracts
-└── services/     # Market data, MCP, persistence, dispatch, and logging adapters
-scripts/          # Maintenance utilities
-tests/            # Focused regression tests
-Dockerfile        # Production container image
+OpenAi-Build-Week-Hackthon/
+|-- backend/
+|   |-- app/
+|   |   |-- agents/       # LangGraph agents, prompts, tools, and state
+|   |   |-- api/routes/   # Auth, discovery, analysis, market, and telemetry APIs
+|   |   |-- core/         # Model routing, validation, security, and configuration
+|   |   |-- db/           # SQLAlchemy persistence models
+|   |   |-- schemas/      # Pydantic contracts
+|   |   `-- services/     # Data, MCP, dispatch, persistence, and logging adapters
+|   |-- tests/            # Focused backend regression tests
+|   `-- Dockerfile
+|-- frontend/
+|   |-- src/
+|   |   |-- components/   # Research, evidence, reports, and shared UI
+|   |   |-- pages/        # Dashboard, discovery, analysis, history, and login
+|   |   |-- services/     # Typed backend API client
+|   |   `-- types/        # Shared frontend contracts
+|   `-- public/
+|-- photos/               # Hackathon product screenshots
+|-- LICENSE
+`-- README.md
 ```
 
-## Quick start
+## Run locally
 
 ### Prerequisites
 
-- Python 3.11 or newer (the container uses Python 3.12)
+- Node.js 20+
+- Python 3.11+
 - PostgreSQL or Supabase
 - An OpenAI API key with access to the configured models
 
-### 1. Create an environment
+### 1. Clone the repository
 
 ```bash
-python -m venv .venv
+git clone https://github.com/Rushilm9/OpenAi-Build-Week-Hackthon.git
+cd OpenAi-Build-Week-Hackthon
 ```
 
-Activate it:
+### 2. Start the backend
 
 ```powershell
+cd backend
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-```
-
-```bash
-source .venv/bin/activate
-```
-
-### 2. Install dependencies
-
-```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-```
-
-### 3. Configure the service
-
-Copy the safe template and fill in your own credentials:
-
-```powershell
 Copy-Item .env.example .env
 ```
 
-```bash
-cp .env.example .env
-```
-
-At minimum, configure:
+Set at least these values in `backend/.env`:
 
 ```dotenv
 OPENAI_API_KEY=your_openai_api_key
 DATABASE_URL=postgresql://user:password@host:5432/database
 ```
 
-Never commit `.env` or any credential file.
+Run the API:
 
-### 4. Run locally
-
-```bash
+```powershell
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Useful URLs:
+- Health check: `http://localhost:8000/health`
+- OpenAPI documentation: `http://localhost:8000/docs`
 
-- API health: `http://localhost:8000/health`
-- OpenAPI docs: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+### 3. Start the frontend
+
+In a second terminal:
+
+```powershell
+cd frontend
+npm ci
+Copy-Item .env.example .env
+npm run dev
+```
+
+Set the local API URL in `frontend/.env`:
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+Open `http://localhost:5173`.
+
+## Verification
+
+### Backend
+
+```powershell
+cd backend
+python -m pytest tests/test_openai_pivot.py tests/test_evidence_summary_bounds.py test_verdict_consistency.py -q
+python -m compileall -q app tests
+```
+
+### Frontend
+
+```powershell
+cd frontend
+npm run test:sanitize
+npm run build
+npm run lint
+```
+
+The focused tests cover OpenAI routing, refusal and verdict consistency, evidence-summary bounds, and safe rendering. External model calls are not required for the deterministic regression checks.
 
 ## Core API surface
 
 | Area | Representative endpoints |
 | --- | --- |
 | Health | `GET /`, `GET /health`, `GET /mcp/health` |
-| Discovery | `POST /analysis/discover`, `POST /analysis/discover/jobs`, `GET /analysis/discover/jobs/{job_id}` |
-| Analysis | `POST /analysis/analyze`, `POST /analysis/analyze_batch`, `POST /analysis/dispatch/{run_id}` |
-| Results | `GET /analysis/history`, `GET /analysis/history/{rec_id}`, `GET /analysis/latest/{symbol}` |
+| Discovery | `POST /analysis/discover`, `POST /analysis/discover/jobs` |
+| Analysis | `POST /analysis/analyze`, `POST /analysis/analyze_batch` |
+| Results | `GET /analysis/history`, `GET /analysis/history/{rec_id}` |
 | Market | `GET /market/dashboard`, `GET /market/news`, `GET /market/indices` |
-| Telemetry | `GET /api/agentlogs/runs`, `GET /api/agentlogs/stats`, `GET /failures` |
+| Telemetry | `GET /api/agentlogs/runs`, `GET /api/agentlogs/stats` |
 | Authentication | `POST /auth/register`, `POST /auth/login`, `POST /auth/logout` |
 
-The interactive OpenAPI page is the authoritative request/response reference for the running build.
+The running OpenAPI page is the authoritative request and response reference.
 
-## Configuration
+## Current limitations and next steps
 
-See `.env.example` for the complete safe template. Important groups are:
+- Research quality depends on the freshness and availability of upstream market data.
+- Model-backed workflows have higher latency and cost than a single deterministic screen.
+- The current product is focused on Indian equities and research workflows.
+- Outputs require independent human review and are not personalized financial advice.
 
-- `OPENAI_*`: API key, model roles, and request timeout;
-- `DATABASE_URL`: PostgreSQL/Supabase connection;
-- `MCP_*`: upstream market-data service, timeout, retries, and fallback behavior;
-- `CORS_ORIGINS` and `PUBLIC_API_BASE_URL`: frontend integration;
-- `DISCOVERY_HARD_*`: liquidity and price filters;
-- optional financial-data provider credentials;
-- `ENABLE_DEV_ROUTES=false`: keeps destructive diagnostic routes out of public deployments.
+Next steps include historical decision evaluation, richer source-level citations, team research workspaces, configurable evaluation datasets, and broader market coverage.
 
-## Tests
+## Responsible use
 
-Run the deterministic regression suite without external API calls:
-
-```bash
-python -m pytest tests/test_openai_pivot.py test_verdict_consistency.py -q
-```
-
-Useful additional checks:
-
-```bash
-python -m compileall -q app tests
-python -c "from app.main import app; print(app.title)"
-```
-
-Use an isolated SQLite database for import-only checks when PostgreSQL is unavailable:
-
-```powershell
-$env:DATABASE_URL='sqlite:///:memory:'
-python -c "from app.main import app; print(app.title)"
-```
-
-## Docker and deployment
-
-Build and run the production container:
-
-```bash
-docker build -t arthavest-backend .
-docker run --rm -p 10000:10000 --env-file .env arthavest-backend
-```
-
-The included GitHub Actions workflow builds the image, pushes it to Google Artifact Registry, and deploys the API to Cloud Run on pushes to `main`. Configure the required Google Cloud repository secrets before enabling that workflow.
-
-## Security and responsible use
-
-- Do not expose `.env`, database credentials, provider keys, or diagnostic routes.
-- Keep `ENABLE_DEV_ROUTES=false` in public environments.
-- Configure explicit CORS origins for every deployed frontend.
-- Treat all outputs as research assistance, not personalized financial advice.
-- Validate recommendations independently before making any investment decision.
+`BUY`, `SELL`, and `WAIT` are research verdicts, not instructions to trade. ArthVest does not know a user's complete financial situation, risk tolerance, or regulatory obligations. Validate every output independently before making an investment decision.
 
 ## License
 
 Released under the [MIT License](LICENSE).
+
+<div align="center">
+  <sub>Built for OpenAI Build Week · Turning fragmented market signals into structured, explainable research.</sub>
+</div>
