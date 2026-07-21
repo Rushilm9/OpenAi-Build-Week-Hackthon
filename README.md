@@ -22,9 +22,11 @@
 Discover → Analyze → Debate → Validate → Decide → Report
 ```
 
-## Problem statement
+## 🎯 Problem
 
 Investment research is not one search or one prompt. A serious researcher must combine macro conditions, market breadth, company fundamentals, price action, chart structure, news, sentiment, time horizon, risk, and conflicting evidence before reaching a conclusion.
+
+> **The core problem:** researchers do not lack information; they lack a reliable system for turning scattered and conflicting information into a decision they can inspect, challenge, and reuse.
 
 Today that process is usually:
 
@@ -34,9 +36,9 @@ Today that process is usually:
 - **Hard to audit:** many AI tools return an answer without showing missing data, disagreement, or validation failures.
 - **Overconfident:** generic assistants are optimized to answer even when the available evidence is stale, weak, or contradictory.
 
-The result is a productivity problem and a trust problem. Researchers spend too much time assembling information and still struggle to explain why a conclusion should be believed.
+The result is both a productivity problem and a trust problem. Researchers spend too much time assembling information and still struggle to explain why a conclusion should be believed.
 
-## The solution
+## 💡 Solution
 
 ArthVest behaves like a coordinated research desk rather than a single chatbot. It runs two connected workflows:
 
@@ -44,6 +46,14 @@ ArthVest behaves like a coordinated research desk rather than a single chatbot. 
 2. **Company analysis** dispatches independent technical, fundamental, sentiment, and chart-pattern specialists, merges their evidence, checks the selected horizon, stages a bull-versus-bear debate, and applies deterministic validation before producing a report.
 
 The system can return **`WAIT`** when evidence is incomplete or conviction is not justified. Refusing to manufacture certainty is a core product feature.
+
+| Problem | ArthVest response | Research outcome |
+| --- | --- | --- |
+| Evidence is scattered across tools | A guided workflow gathers market, company, news, and price evidence | Less manual collection and context switching |
+| One opinion creates confirmation bias | Independent specialists plus a bull-versus-bear debate | Competing explanations are considered before synthesis |
+| AI answers hide uncertainty | Evidence quality, risks, counter-signals, and missing data stay visible | The researcher can audit why a verdict was produced |
+| Weak evidence still produces confident language | Deterministic checks can cap confidence or return `WAIT` | Uncertainty becomes an explicit, useful output |
+| Research disappears after the session | Reports are stored, searchable, and exportable | Analysis becomes durable team knowledge |
 
 ## Why ArthVest is different
 
@@ -130,17 +140,27 @@ flowchart LR
 
 No single specialist controls the final conclusion. The decision is produced only after independent evidence has been merged, challenged, and validated.
 
-## OpenAI GPT-5.6 integration
+## 🧠 How GPT-5.6 powers ArthVest
 
-OpenAI models run behind a server-side model boundary implemented in `backend/app/core/model_router.py`. The browser never receives an OpenAI credential and cannot submit an arbitrary model ID.
+GPT-5.6 is the runtime intelligence inside ArthVest. OpenAI models run behind a server-side model boundary implemented in `backend/app/core/model_router.py`; the browser never receives an OpenAI credential and cannot submit an arbitrary model ID.
 
-| Runtime role | Workload | Model | Reasoning effort |
+| Runtime role | Where it is used | Model | Reasoning effort |
 | --- | --- | --- | --- |
-| `DISCOVERY` | High-throughput discovery and context gathering | `gpt-5.6-terra` | Low |
-| `ANALYSIS` | Planning, specialist reasoning, and decision synthesis | `gpt-5.6-sol` | Medium |
-| `ANALYSIS_DEEP` | Adversarial debate and the hardest reasoning steps | `gpt-5.6-sol` | High |
+| `DISCOVERY` | Economic/news context, discovery, and technical, fundamental, sentiment, and chart evidence extraction | `gpt-5.6-terra` | Low |
+| `ANALYSIS` | Research planning, macro synthesis, and the final decision narrative | `gpt-5.6-sol` | Medium |
+| `ANALYSIS_DEEP` | Adversarial bull-versus-bear debate and the hardest synthesis step | `gpt-5.6-sol` | High |
 
-All roles use OpenAI through the Responses API via `langchain-openai`. Role-based routing gives fast discovery work a different cost/latency profile from deep synthesis, while a strict allowlist prevents unreviewed models from entering the workflow.
+### Reasoning where it matters
+
+ArthVest does not assign maximum reasoning to every agent. That would increase latency and cost without improving every stage equally. Instead, it treats reasoning effort as an orchestration decision:
+
+```text
+LOW reasoning     → broad, repeatable evidence collection and specialist extraction
+MEDIUM reasoning  → planning, cross-signal synthesis, and the final research narrative
+HIGH reasoning    → adversarial debate where disagreement is most valuable
+```
+
+This tiered approach is one of the system's central innovations: use faster, lower-reasoning agents for breadth, then reserve the strongest reasoning for high-impact synthesis and challenge. All roles use OpenAI through the Responses API via `langchain-openai`, and a strict model allowlist prevents unreviewed models from entering the workflow.
 
 GPT-5.6 is used to:
 
@@ -152,17 +172,23 @@ GPT-5.6 is used to:
 
 Deterministic code remains responsible for validation rules, verdict normalization, persistence, authentication, API boundaries, and refusal behavior.
 
-## How Codex was used
+## 🛠️ How Codex was used to build ArthVest
 
-Codex was part of the engineering workflow from architecture through verification. I developed and used exactly three focused Codex skills for ArthVest:
+Codex was the development partner used to build ArthVest; GPT-5.6 is the intelligence used by the running product. I developed exactly three focused Codex skills and used them as a gated engineering loop:
 
-| Custom Codex skill | Contribution |
-| --- | --- |
-| **Architect** | Mapped the complete researcher journey, separated discovery from analysis, defined agent and service boundaries, designed shared state, and established refusal-first safety and failure paths. |
-| **Implement** | Turned the architecture into the React application, FastAPI services, LangGraph workflows, OpenAI model routing, persistence, telemetry, report export, and frontend/backend contracts. |
-| **Test** | Checked verdict consistency, evidence bounds, refusal behavior, model configuration, safe rendering, imports, builds, and the critical journey from discovery to a saved explainable report. |
+```text
+Architect → approved system blueprint → Implement → working product → Test → verified evidence
+     ↑                                                                       |
+     └──────────────── failures and findings feed the next focused change ───┘
+```
 
-Codex accelerated repository inspection, focused implementation, cross-layer debugging, documentation, and verification. Human judgment remained responsible for the problem definition, product decisions, research rules, evaluation criteria, and final review.
+| Custom Codex skill | What I asked it to do | Concrete contribution |
+| --- | --- | --- |
+| **Architect** | Design the system before changing code | Mapped the researcher journey, separated discovery from analysis, defined agent/service boundaries and shared state, selected the reasoning tiers, and established refusal-first safety and failure paths. |
+| **Implement** | Build only from the approved architecture | Created the React experience, FastAPI services, LangGraph workflows, GPT-5.6 routing, persistence, telemetry, report export, and typed frontend/backend contracts. |
+| **Test** | Challenge the implementation with reproducible checks | Verified verdict consistency, evidence bounds, refusal behavior, model configuration, safe rendering, imports, builds, and the journey from discovery to a saved explainable report. |
+
+This was not a one-shot code-generation prompt. Codex inspected the existing code, worked against explicit success criteria, traced failures across frontend and backend boundaries, and used test evidence to guide focused corrections. Human judgment remained responsible for the problem definition, product decisions, research rules, evaluation criteria, and final review.
 
 ## Safety, trust, and explainability
 
